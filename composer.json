@@ -1,0 +1,46 @@
+{
+    "name": "harmonyio/orm",
+    "description": "Asynchronous ORM library",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Pieter Hordijk",
+            "email": "info@pieterhordijk.com"
+        }
+    ],
+    "minimum-stability": "dev",
+    "prefer-stable": true,
+    "require": {
+        "php": "^7.2",
+        "amphp/amp": "^2.0",
+        "amphp/mysql": "^1.1",
+        "amphp/postgres": "^1.0",
+        "amphp/sql": "^1.0",
+        "amphp/sql-common": "^1.0",
+        "harmonyio/dbal": "dev-master",
+        "php-di/phpdoc-reader": "^2.1"
+    },
+    "require-dev": {
+        "harmonyio/php-codesniffer-ruleset": "dev-master",
+        "harmonyio/phpunit-extension": "^0.1",
+        "maglnet/composer-require-checker": "^1.1",
+        "phploc/phploc": "^5.0",
+        "phpunit/phpunit": "^7.4",
+        "slevomat/coding-standard": "^4.8",
+        "squizlabs/php_codesniffer": "^3.3.1"
+    },
+    "autoload": {
+        "psr-4": {
+            "HarmonyIO\\Orm\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "HarmonyIO\\OrmTest\\": "tests/"
+        }
+    },
+    "config": {
+        "sort-packages": true
+    }
+}
