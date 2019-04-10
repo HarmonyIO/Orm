@@ -7,6 +7,7 @@ use HarmonyIO\Dbal\Connection;
 use HarmonyIO\Orm\Entity\Definition\Generator\ArrayCache;
 use HarmonyIO\Orm\EntityManager;
 use HarmonyIO\Orm\Examples\Entity\User;
+use HarmonyIO\Orm\Hydrator\Hydrator;
 use function Amp\Postgres\pool;
 use function Amp\Promise\wait;
 
@@ -18,6 +19,6 @@ $postgresPool = pool(
 
 $connection = new Connection($postgresPool);
 
-$em = new EntityManager($connection, $postgresPool, new ArrayCache());
+$em = new EntityManager($connection, $postgresPool, new ArrayCache(), new Hydrator());
 
 var_dump(wait($em->find(User::class, 1)));

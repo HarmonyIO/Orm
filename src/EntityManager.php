@@ -9,6 +9,7 @@ use Amp\Sql\Statement;
 use HarmonyIO\Dbal\Connection;
 use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
 use HarmonyIO\Orm\Entity\Entity;
+use HarmonyIO\Orm\Hydrator\Hydrator;
 use HarmonyIO\Orm\Mapping\Entity as EntityMapper;
 use HarmonyIO\Orm\Mapping\Field;
 use HarmonyIO\Orm\Query\Select;
@@ -25,11 +26,15 @@ class EntityManager
     /** @var Generator */
     private $definitionGenerator;
 
-    public function __construct(Connection $dbal, Link $link, Generator $definitionGenerator)
+    /** @var Hydrator */
+    private $hydrator;
+
+    public function __construct(Connection $dbal, Link $link, Generator $definitionGenerator, Hydrator $hydrator)
     {
         $this->dbal                = $dbal;
         $this->link                = $link;
         $this->definitionGenerator = $definitionGenerator;
+        $this->hydrator            = $hydrator;
     }
 
     /**
@@ -53,46 +58,7 @@ class EntityManager
                 return null;
             }
 
-            return $this->createEntity($entity, $entityMapper, $result->getCurrent());
+            return $this->hydrator->createEntity($entity, $entityMapper, $result->getCurrent());
         });
-    }
-
-    /**
-     * @param mixed[] $data
-     */
-    private function createEntity(string $entityClass, EntityMapper $entityMapper, array $data): Entity
-    {
-        $reflectionClass = new \ReflectionClass($entityClass);
-
-        /** @var Entity $entity */
-        $entity = $reflectionClass->newInstanceWithoutConstructor();
-
-        foreach ($entityMapper->getFields() as $field) {
-            if ($field instanceof Field) {
-                $this->setProperty($reflectionClass, $entity, $field->getProperty(), $data[$field->getAlias()]);
-
-                continue;
-            }
-
-            $this->setProperty(
-                $reflectionClass,
-                $entity,
-                $field->getProperty(),
-                $this->createEntity($field->getEntity()->getEntityClassName(), $field->getEntity(), $data)
-            );
-        }
-
-        return $entity;
-    }
-
-    /**
-     * @param mixed $value
-     */
-    private function setProperty(\ReflectionClass $reflectionClass, Entity $entity, string $property, $value): void
-    {
-        $property = $reflectionClass->getProperty($property);
-
-        $property->setAccessible(true);
-        $property->setValue($entity, $value);
     }
 }
