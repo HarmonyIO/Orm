@@ -18,8 +18,8 @@
         "amphp/postgres": "^1.0",
         "amphp/sql": "^1.0",
         "amphp/sql-common": "^1.0",
-        "harmonyio/dbal": "dev-master",
-        "php-di/phpdoc-reader": "^2.1"
+        "doctrine/inflector": "^1.3",
+        "harmonyio/dbal": "dev-master"
     },
     "require-dev": {
         "harmonyio/php-codesniffer-ruleset": "dev-master",
@@ -37,7 +37,8 @@
     },
     "autoload-dev": {
         "psr-4": {
-            "HarmonyIO\\OrmTest\\": "tests/"
+            "HarmonyIO\\OrmTest\\": "tests/",
+            "HarmonyIO\\Orm\\Examples\\": "examples/"
         }
     },
     "config": {

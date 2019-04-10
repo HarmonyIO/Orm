@@ -7,11 +7,11 @@ use Amp\Sql\Link;
 use Amp\Sql\ResultSet;
 use Amp\Sql\Statement;
 use HarmonyIO\Dbal\Connection;
-use HarmonyIO\Dbal\QueryBuilder\Statement\Select;
-use HarmonyIO\Orm\Mapping\Entity;
+use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
+use HarmonyIO\Orm\Entity\Entity;
+use HarmonyIO\Orm\Mapping\Entity as EntityMapper;
 use HarmonyIO\Orm\Mapping\Field;
-use HarmonyIO\Orm\Mapping\JoinedField;
-use PhpDocReader\PhpDocReader;
+use HarmonyIO\Orm\Query\Select;
 use function Amp\call;
 
 class EntityManager
@@ -22,24 +22,26 @@ class EntityManager
     /** @var Link */
     private $link;
 
-    public function __construct(Connection $dbal, Link $link)
+    /** @var Generator */
+    private $definitionGenerator;
+
+    public function __construct(Connection $dbal, Link $link, Generator $definitionGenerator)
     {
-        $this->dbal = $dbal;
-        $this->link = $link;
+        $this->dbal                = $dbal;
+        $this->link                = $link;
+        $this->definitionGenerator = $definitionGenerator;
     }
 
     /**
      * @param mixed $id
+     * @return Promise<Entity|null>
      */
     public function find(string $entity, $id): Promise
     {
         return call(function () use ($entity, $id) {
-            $entityMapper = new Entity(new PhpDocReader(), $entity);
-
-            $query = $this->dbal->select(...$this->getFieldsDefinition($entityMapper));
-            $query = $query->from($entityMapper->getTable()->getName() . ' AS ' . $entityMapper->getTable()->getAlias());
-            $query = $this->addJoins($query, $entityMapper);
-            $query = $query->where($entityMapper->getTable()->getAlias() . '.id = ?', $id);
+            $entityDefinition = $this->definitionGenerator->generate($entity);
+            $entityMapper     = new EntityMapper($this->definitionGenerator, $entityDefinition);
+            $query            = (new Select($this->dbal))->build($entityMapper, $id);
 
             /** @var Statement $stmt */
             $stmt = yield $this->link->prepare($query->getQuery());
@@ -56,76 +58,37 @@ class EntityManager
     }
 
     /**
-     * @return string[]
-     */
-    private function getFieldsDefinition(Entity $entityMapper): array
-    {
-        $fieldsMapping = $entityMapper->getFields();
-
-        $fields = [];
-
-        foreach ($fieldsMapping as $field) {
-            if ($field instanceof Field) {
-                $fields[] = sprintf('%s.%s AS %s', $field->getTable()->getAlias(), $field->getField(), $field->getAlias());
-            } else {
-                $fields = array_merge($fields, $this->getFieldsDefinition($field->getEntity()));
-            }
-        }
-
-        return $fields;
-    }
-
-    private function addJoins(Select $query, Entity $entityMapper): Select
-    {
-        foreach ($entityMapper->getFields() as $field) {
-            if (!($field instanceof JoinedField)) {
-                continue;
-            }
-
-            $query->join(
-                $field->getReferencedTable()->getName() . ' AS ' . $field->getReferencedTable()->getAlias(),
-                sprintf(
-                    '%s.%s = %s.%s',
-                    $field->getReferencedTable()->getAlias(),
-                    $field->getReferencedField(),
-                    $field->getTable()->getAlias(),
-                    $field->getField()
-                )
-            );
-        }
-
-        return $query;
-    }
-
-    /**
      * @param mixed[] $data
-     * @return object
      */
-    private function createEntity(string $entityClass, Entity $entityMapper, array $data)
+    private function createEntity(string $entityClass, EntityMapper $entityMapper, array $data): Entity
     {
         $reflectionClass = new \ReflectionClass($entityClass);
 
+        /** @var Entity $entity */
         $entity = $reflectionClass->newInstanceWithoutConstructor();
 
         foreach ($entityMapper->getFields() as $field) {
             if ($field instanceof Field) {
                 $this->setProperty($reflectionClass, $entity, $field->getProperty(), $data[$field->getAlias()]);
+
+                continue;
             }
 
-            if ($field instanceof JoinedField) {
-                $this->setProperty(
-                    $reflectionClass,
-                    $entity,
-                    $field->getProperty(),
-                    $this->createEntity($field->getEntity()->getEntityClass(), $field->getEntity(), $data)
-                );
-            }
+            $this->setProperty(
+                $reflectionClass,
+                $entity,
+                $field->getProperty(),
+                $this->createEntity($field->getEntity()->getEntityClassName(), $field->getEntity(), $data)
+            );
         }
 
         return $entity;
     }
 
-    private function setProperty(\ReflectionClass $reflectionClass, $entity, string $property, $value): void
+    /**
+     * @param mixed $value
+     */
+    private function setProperty(\ReflectionClass $reflectionClass, Entity $entity, string $property, $value): void
     {
         $property = $reflectionClass->getProperty($property);
 

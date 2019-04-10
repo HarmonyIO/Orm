@@ -2,15 +2,16 @@
 
 namespace HarmonyIO\Orm\Mapping;
 
-use PhpDocReader\PhpDocReader;
+use HarmonyIO\Orm\Entity\Definition\Definition;
+use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
 
 class Entity
 {
-    /** @var PhpDocReader */
-    private $docBlockReader;
+    /** @var Generator */
+    private $definitionGenerator;
 
     /** @var string */
-    private $entityClass;
+    private $entityClassName;
 
     /** @var Table */
     private $table;
@@ -18,30 +19,24 @@ class Entity
     /** @var Field[]|JoinedField[] */
     private $fields = [];
 
-    public function __construct(PhpDocReader $docBlockReader, string $entityClass)
+    public function __construct(Generator $definitionGenerator, Definition $definition)
     {
-        $this->docBlockReader = $docBlockReader;
-        $this->entityClass    = $entityClass;
+        $this->definitionGenerator = $definitionGenerator;
+        $this->entityClassName     = $definition->getEntityClassName();
 
-        $reflectionClass = new \ReflectionClass($entityClass);
+        $this->table = new Table($definition->getTableName(), $this->generateAlias());
 
-        $this->table = new Table($this->getTableNameFromEntity($reflectionClass), $this->generateAlias());
-
-        $this->buildFields($reflectionClass);
+        $this->buildFields($definition);
     }
 
-    private function buildFields(\ReflectionClass $entity): void
+    private function buildFields(Definition $definition): void
     {
-        foreach ($entity->getProperties() as $property) {
-            $propertyClass = $this->docBlockReader->getPropertyClass(
-                new \ReflectionProperty($entity->getName(), $property->getName())
-            );
-
-            if (!$propertyClass) {
+        foreach ($definition->getProperties() as $property) {
+            if (!$property->hasRelation()) {
                 $this->fields[] = new Field(
                     $property->getName(),
                     $this->table,
-                    $property->getName(),
+                    $property->getColumn(),
                     $this->generateAlias(),
                     new Type(Type::FIELD)
                 );
@@ -49,31 +44,20 @@ class Entity
                 continue;
             }
 
-            $joinedEntity = new Entity($this->docBlockReader, $propertyClass);
+            $joinedEntity = new Entity(
+                $this->definitionGenerator,
+                $this->definitionGenerator->generate($property->getRelation()->getEntityClassName())
+            );
 
             $this->fields[] = new JoinedField(
                 $property->getName(),
                 $this->table,
-                $this->getJoinColumn($entity, $property),
+                $property->getColumn(),
                 $joinedEntity->getTable(),
-                $this->getReferencedJoinColumn($entity, $property),
+                $property->getRelation()->getForeignKey(),
                 $joinedEntity
             );
         }
-    }
-
-    private function getTableNameFromEntity(\ReflectionClass $entity): string
-    {
-        if ($entity->hasConstant('TABLE')) {
-            return $entity->getConstant('TABLE');
-        }
-
-        return $this->convertPascalCaseToSnakeCase($entity->getShortName());
-    }
-
-    private function convertPascalCaseToSnakeCase(string $text): string
-    {
-        return trim(strtolower(preg_replace('/([A-Z])/', '_$1', $text)), '_');
     }
 
     private function generateAlias(): string
@@ -81,29 +65,9 @@ class Entity
         return bin2hex(random_bytes(16));
     }
 
-    private function getJoinColumn(\ReflectionClass $entity, \ReflectionProperty $property): string
+    public function getEntityClassName(): string
     {
-        $docBlock = (new \ReflectionProperty($entity->getName(), $property->getName()))->getDocComment();
-
-        preg_match('~@column\s+(.+)$~m', $docBlock, $matches);
-
-        return trim($matches[1]);
-    }
-
-    private function getReferencedJoinColumn(\ReflectionClass $entity, \ReflectionProperty $property): string
-    {
-        $docBlock = (new \ReflectionProperty($entity->getName(), $property->getName()))->getDocComment();
-
-        if (preg_match('~@referencedColumn\s+(.+)$~m', $docBlock, $matches) !== 1) {
-            return 'id';
-        }
-
-        return trim($matches[1]);
-    }
-
-    public function getEntityClass(): string
-    {
-        return $this->entityClass;
+        return $this->entityClassName;
     }
 
     /**
