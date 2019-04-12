@@ -2,9 +2,11 @@
 
 namespace HarmonyIO\Orm\Mapping;
 
+use HarmonyIO\Orm\Entity\Definition\Property\Property;
+
 class JoinedField
 {
-    /** @var string */
+    /** @var Property */
     private $property;
 
     /** @var Table */
@@ -23,7 +25,7 @@ class JoinedField
     private $entity;
 
     public function __construct(
-        string $property,
+        Property $property,
         Table $table,
         string $field,
         Table $referencedTable,
@@ -38,7 +40,7 @@ class JoinedField
         $this->entity          = $entity;
     }
 
-    public function getProperty(): string
+    public function getProperty(): Property
     {
         return $this->property;
     }

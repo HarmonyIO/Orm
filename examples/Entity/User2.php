@@ -2,11 +2,10 @@
 
 namespace HarmonyIO\Orm\Examples\Entity;
 
-use HarmonyIO\Orm\Collection;
 use HarmonyIO\Orm\Entity\Definition\Property\Mapping;
 use HarmonyIO\Orm\Entity\Entity;
 
-class User extends Entity
+class User2 extends Entity
 {
     /** @var int */
     private $id;
@@ -20,11 +19,10 @@ class User extends Entity
     /** @var Company */
     private $company;
 
-    /** @var Collection */
-    private $notes;
-
     /** @var bool */
     private $isAdmin;
+
+    private $notes;
 
     protected function table(): string
     {
@@ -65,11 +63,6 @@ class User extends Entity
     public function getCompany(): Company
     {
         return $this->company;
-    }
-
-    public function getNotes(): Collection
-    {
-        return $this->notes;
     }
 
     public function isAdmin(): bool

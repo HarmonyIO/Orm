@@ -6,5 +6,6 @@ use HarmonyIO\Orm\Enum;
 
 class RelationType extends Enum
 {
-    public const HAS_ONE = 'hasOne';
+    public const HAS_ONE  = 'hasOne';
+    public const HAS_MANY = 'hasMany';
 }

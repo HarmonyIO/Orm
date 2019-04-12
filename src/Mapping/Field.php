@@ -2,9 +2,11 @@
 
 namespace HarmonyIO\Orm\Mapping;
 
+use HarmonyIO\Orm\Entity\Definition\Property\Property;
+
 class Field
 {
-    /** @var string */
+    /** @var Property */
     private $property;
 
     /** @var Table */
@@ -19,7 +21,7 @@ class Field
     /** @var Type */
     private $type;
 
-    public function __construct(string $property, Table $table, string $field, string $alias, Type $type)
+    public function __construct(Property $property, Table $table, string $field, string $alias, Type $type)
     {
         $this->property = $property;
         $this->table    = $table;
@@ -28,7 +30,7 @@ class Field
         $this->type     = $type;
     }
 
-    public function getProperty(): string
+    public function getProperty(): Property
     {
         return $this->property;
     }

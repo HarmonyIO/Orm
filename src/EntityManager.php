@@ -11,7 +11,6 @@ use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
 use HarmonyIO\Orm\Entity\Entity;
 use HarmonyIO\Orm\Hydrator\Hydrator;
 use HarmonyIO\Orm\Mapping\Entity as EntityMapper;
-use HarmonyIO\Orm\Mapping\Field;
 use HarmonyIO\Orm\Query\Select;
 use function Amp\call;
 
@@ -58,7 +57,13 @@ class EntityManager
                 return null;
             }
 
-            return $this->hydrator->createEntity($entity, $entityMapper, $result->getCurrent());
+            $recordSet = [];
+
+            do {
+                $recordSet[] = $result->getCurrent();
+            } while (yield $result->advance());
+
+            return $this->hydrator->createEntity($entity, $entityMapper, $recordSet);
         });
     }
 }

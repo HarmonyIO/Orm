@@ -4,6 +4,7 @@ namespace HarmonyIO\Orm\Mapping;
 
 use HarmonyIO\Orm\Entity\Definition\Definition;
 use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
+use HarmonyIO\Orm\Entity\Definition\Relation\RelationType;
 
 class Entity
 {
@@ -33,8 +34,8 @@ class Entity
     {
         foreach ($definition->getProperties() as $property) {
             if (!$property->hasRelation()) {
-                $this->fields[] = new Field(
-                    $property->getName(),
+                $this->fields[$property->getName()] = new Field(
+                    $property,
                     $this->table,
                     $property->getColumn(),
                     $this->generateAlias(),
@@ -49,10 +50,16 @@ class Entity
                 $this->definitionGenerator->generate($property->getRelation()->getEntityClassName())
             );
 
-            $this->fields[] = new JoinedField(
-                $property->getName(),
+            $joinedField = $property->getColumn();
+
+            if ($property->getRelation()->getRelationType()->getValue() === RelationType::HAS_MANY) {
+                $joinedField = $property->getRelation()->getLocalKey();
+            }
+
+            $this->fields[$property->getName()] = new JoinedField(
+                $property,
                 $this->table,
-                $property->getColumn(),
+                $joinedField,
                 $joinedEntity->getTable(),
                 $property->getRelation()->getForeignKey(),
                 $joinedEntity

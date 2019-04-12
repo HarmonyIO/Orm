@@ -55,7 +55,7 @@ class Select
                 continue;
             }
 
-            $query->join(
+            $query->leftJoin(
                 $field->getReferencedTable()->getName() . ' AS ' . $field->getReferencedTable()->getAlias(),
                 sprintf(
                     '%s.%s = %s.%s',

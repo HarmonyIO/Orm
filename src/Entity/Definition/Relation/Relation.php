@@ -16,16 +16,21 @@ class Relation
     /** @var string */
     private $foreignKey;
 
+    /** @var string|null */
+    private $localKey;
+
     public function __construct(
         RelationType $relationType,
         LoadType $loadType,
         string $entityClassName,
-        string $foreignKey
+        string $foreignKey,
+        ?string $localKey = null
     ) {
         $this->relationType    = $relationType;
         $this->loadType        = $loadType;
         $this->entityClassName = $entityClassName;
         $this->foreignKey      = $foreignKey;
+        $this->localKey        = $localKey;
     }
 
     public function getRelationType(): RelationType
@@ -46,5 +51,10 @@ class Relation
     public function getForeignKey(): string
     {
         return $this->foreignKey;
+    }
+
+    public function getLocalKey(): ?string
+    {
+        return $this->localKey;
     }
 }

@@ -2,6 +2,7 @@
 
 namespace HarmonyIO\Orm\Entity;
 
+use Doctrine\Common\Inflector\Inflector;
 use HarmonyIO\Orm\Entity\Definition\Relation\LoadType;
 use HarmonyIO\Orm\Entity\Definition\Relation\Relation;
 use HarmonyIO\Orm\Entity\Definition\Relation\RelationType;
@@ -18,6 +19,21 @@ abstract class Entity
             new LoadType(LoadType::EAGER),
             $entityClass,
             $foreignKey
+        );
+    }
+
+    protected function hasMany(string $propertyName, string $entityClass, ?string $foreignKey = null, string $localKey = 'id'): void
+    {
+        if ($foreignKey === null) {
+            $foreignKey = Inflector::tableize((new \ReflectionClass(static::class))->getShortName()) . '_id';
+        }
+
+        $this->relations[$propertyName] = new Relation(
+            new RelationType(RelationType::HAS_MANY),
+            new LoadType(LoadType::EAGER),
+            $entityClass,
+            $foreignKey,
+            $localKey
         );
     }
 
