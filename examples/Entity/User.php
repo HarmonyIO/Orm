@@ -26,6 +26,9 @@ class User extends Entity
     /** @var Collection */
     private $permissions;
 
+    /** @var bool */
+    private $isAdmin;
+
     protected function table(): string
     {
         return 'members';
@@ -76,5 +79,10 @@ class User extends Entity
     public function getPermissions(): Collection
     {
         return $this->permissions;
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->isAdmin;
     }
 }
