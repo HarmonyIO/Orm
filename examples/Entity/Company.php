@@ -12,12 +12,12 @@ class Company extends Entity
     /** @var string */
     private $name;
 
-    /** @var Country */
-    private $country;
+    /** @var CompanyLocation */
+    private $location;
 
     protected function relate(): void
     {
-        $this->oneToOne('country', Country::class);
+        $this->oneToOne('location', CompanyLocation::class, 'id', 'location_id');
     }
 
     public function getId(): int
@@ -30,8 +30,8 @@ class Company extends Entity
         return $this->name;
     }
 
-    public function getCountry(): Country
+    public function getLocation(): CompanyLocation
     {
-        return $this->country;
+        return $this->location;
     }
 }

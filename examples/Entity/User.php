@@ -46,7 +46,7 @@ class User extends Entity
 
     protected function relate(): void
     {
-        $this->oneToOne('company', Company::class);
+        $this->manyToOne('company', Company::class);
         $this->oneToMany('notes', UserNote::class);
         $this->manyToMany('permissions', Permission::class);
     }

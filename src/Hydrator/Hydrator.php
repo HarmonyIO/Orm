@@ -43,6 +43,17 @@ class Hydrator
                 continue;
             }
 
+            if ($relation->isRelationType(new RelationType(RelationType::MANY_TO_ONE))) {
+                $this->setProperty(
+                    $reflectionClass,
+                    $entity,
+                    $field->getProperty()->getName(),
+                    $this->createEntity($field->getEntity()->getEntityClassName(), $field->getEntity(), $recordSet)
+                );
+
+                continue;
+            }
+
             if ($relation->isRelationType(new RelationType(RelationType::ONE_TO_MANY))) {
                 $nestedRecordSet = [];
 

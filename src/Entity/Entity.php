@@ -5,6 +5,7 @@ namespace HarmonyIO\Orm\Entity;
 use Doctrine\Common\Inflector\Inflector;
 use HarmonyIO\Orm\Entity\Definition\Relation\LoadType;
 use HarmonyIO\Orm\Entity\Definition\Relation\ManyToMany;
+use HarmonyIO\Orm\Entity\Definition\Relation\ManyToOne;
 use HarmonyIO\Orm\Entity\Definition\Relation\OneToMany;
 use HarmonyIO\Orm\Entity\Definition\Relation\OneToOne;
 use HarmonyIO\Orm\Entity\Definition\Relation\Relation;
@@ -21,6 +22,20 @@ abstract class Entity
         }
 
         $this->relations[$propertyName] = new OneToOne(
+            new LoadType(LoadType::EAGER),
+            $entityClass,
+            $foreignKey,
+            $localKey
+        );
+    }
+
+    protected function manyToOne(string $propertyName, string $entityClass, string $foreignKey = 'id', ?string $localKey = null): void
+    {
+        if ($localKey === null) {
+            $localKey = Inflector::tableize((new \ReflectionClass($entityClass))->getShortName()) . '_id';
+        }
+
+        $this->relations[$propertyName] = new ManyToOne(
             new LoadType(LoadType::EAGER),
             $entityClass,
             $foreignKey,

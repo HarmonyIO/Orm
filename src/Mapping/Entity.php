@@ -5,9 +5,9 @@ namespace HarmonyIO\Orm\Mapping;
 use HarmonyIO\Orm\Entity\Definition\Definition;
 use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
 use HarmonyIO\Orm\Entity\Definition\Relation\ManyToMany;
+use HarmonyIO\Orm\Entity\Definition\Relation\ManyToOne;
 use HarmonyIO\Orm\Entity\Definition\Relation\OneToMany;
 use HarmonyIO\Orm\Entity\Definition\Relation\OneToOne;
-use HarmonyIO\Orm\Entity\Definition\Relation\Relation;
 use HarmonyIO\Orm\Entity\Definition\Relation\RelationType;
 
 class Entity
@@ -86,7 +86,19 @@ class Entity
                 continue;
             }
 
-            $linkTable = null;
+            if ($relation->isRelationType(new RelationType(RelationType::MANY_TO_ONE))) {
+                /** @var ManyToOne $relation */
+                $this->fields[$property->getName()] = new JoinedField(
+                    $property,
+                    $this->table,
+                    $property->getColumn(),
+                    $joinedEntity->getTable(),
+                    $relation->getForeignKey(),
+                    $joinedEntity
+                );
+
+                continue;
+            }
 
             if ($property->getRelation()->isRelationType(new RelationType(RelationType::MANY_TO_MANY))) {
                 /** @var ManyToMany $relation */
