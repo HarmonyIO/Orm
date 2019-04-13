@@ -25,11 +25,6 @@ abstract class Relation
         return $this->relationType->getValue() === $relationType->getValue();
     }
 
-    public function getRelationType(): RelationType
-    {
-        return $this->relationType;
-    }
-
     public function getLoadType(): LoadType
     {
         return $this->loadType;
