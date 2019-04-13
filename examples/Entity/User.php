@@ -23,8 +23,8 @@ class User extends Entity
     /** @var Collection */
     private $notes;
 
-    /** @var bool */
-    private $isAdmin;
+    /** @var Collection */
+    private $permissions;
 
     protected function table(): string
     {
@@ -43,8 +43,9 @@ class User extends Entity
 
     protected function relate(): void
     {
-        $this->hasOne('company', Company::class);
-        $this->hasMany('notes', UserNote::class);
+        $this->oneToOne('company', Company::class);
+        $this->oneToMany('notes', UserNote::class);
+        $this->manyToMany('permissions', Permission::class);
     }
 
     public function getId(): int
@@ -72,8 +73,8 @@ class User extends Entity
         return $this->notes;
     }
 
-    public function isAdmin(): bool
+    public function getPermissions(): Collection
     {
-        return $this->isAdmin;
+        return $this->permissions;
     }
 }

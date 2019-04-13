@@ -24,13 +24,17 @@ class JoinedField
     /** @var Entity */
     private $entity;
 
+    /** @var Table|null */
+    private $linkTable;
+
     public function __construct(
         Property $property,
         Table $table,
         string $field,
         Table $referencedTable,
         string $referencedField,
-        Entity $entity
+        Entity $entity,
+        ?Table $linkTable = null
     ) {
         $this->property        = $property;
         $this->table           = $table;
@@ -38,6 +42,7 @@ class JoinedField
         $this->referencedTable = $referencedTable;
         $this->referencedField = $referencedField;
         $this->entity          = $entity;
+        $this->linkTable       = $linkTable;
     }
 
     public function getProperty(): Property
@@ -68,5 +73,10 @@ class JoinedField
     public function getEntity(): Entity
     {
         return $this->entity;
+    }
+
+    public function getLinkTable(): ?Table
+    {
+        return $this->linkTable;
     }
 }

@@ -12,12 +12,16 @@ class Hydrator
     /**
      * @param mixed[] $data
      */
-    public function createEntity(string $entityClass, EntityMapper $entityMapper, array $recordSet): Entity
+    public function createEntity(string $entityClass, EntityMapper $entityMapper, array $recordSet): ?Entity
     {
         $reflectionClass = new \ReflectionClass($entityClass);
 
         /** @var Entity $entity */
         $entity = $reflectionClass->newInstanceWithoutConstructor();
+
+        if ($recordSet[0][$entityMapper->getFields()['id']->getAlias()] === null) {
+            return null;
+        }
 
         foreach ($entityMapper->getFields() as $field) {
             if (!$field->getProperty()->hasRelation()) {
@@ -26,16 +30,20 @@ class Hydrator
                 continue;
             }
 
-            if ($field->getProperty()->getRelation()->getRelationType()->getValue() === RelationType::HAS_ONE) {
+            $relation = $field->getProperty()->getRelation();
+
+            if ($relation->isRelationType(new RelationType(RelationType::ONE_TO_ONE))) {
                 $this->setProperty(
                     $reflectionClass,
                     $entity,
                     $field->getProperty()->getName(),
                     $this->createEntity($field->getEntity()->getEntityClassName(), $field->getEntity(), $recordSet)
                 );
+
+                continue;
             }
 
-            if ($field->getProperty()->getRelation()->getRelationType()->getValue() === RelationType::HAS_MANY) {
+            if ($relation->isRelationType(new RelationType(RelationType::ONE_TO_MANY))) {
                 $nestedRecordSet = [];
 
                 foreach ($recordSet as $record) {
@@ -58,6 +66,35 @@ class Hydrator
                     $field->getProperty()->getName(),
                     $collection
                 );
+
+                continue;
+            }
+
+            if ($relation->isRelationType(new RelationType(RelationType::MANY_TO_MANY))) {
+                $nestedRecordSet = [];
+
+                foreach ($recordSet as $record) {
+                    if ($record[$entityMapper->getFields()['id']->getAlias()] !== $recordSet[0][$entityMapper->getFields()['id']->getAlias()]) {
+                        continue;
+                    }
+
+                    $nestedRecordSet[] = $record;
+                }
+
+                $collection = $this->createCollection(
+                    $field->getEntity()->getEntityClassName(),
+                    $field->getEntity(),
+                    $nestedRecordSet
+                );
+
+                $this->setProperty(
+                    $reflectionClass,
+                    $entity,
+                    $field->getProperty()->getName(),
+                    $collection
+                );
+
+                continue;
             }
         }
 
@@ -83,6 +120,10 @@ class Hydrator
 
         foreach ($recordSets as $nestedRecordSet) {
             $entity = $this->createEntity($entityClass, $entityMapper, $nestedRecordSet);
+
+            if ($entity === null) {
+                continue;
+            }
 
             if (!$collection->contains($entity)) {
                 $collection->add($entity);

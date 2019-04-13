@@ -6,6 +6,8 @@ use Doctrine\Common\Inflector\Inflector;
 use HarmonyIO\Orm\Entity\Definition\Property\MappingCollection;
 use HarmonyIO\Orm\Entity\Definition\Property\Property;
 use HarmonyIO\Orm\Entity\Definition\Property\PropertyCollection;
+use HarmonyIO\Orm\Entity\Definition\Relation\OneToOne;
+use HarmonyIO\Orm\Entity\Definition\Relation\RelationType;
 use HarmonyIO\Orm\Entity\Entity;
 
 class Definition
@@ -84,6 +86,19 @@ class Definition
         foreach ($entityReflection->getProperties() as $property) {
             if (!$entityInstance->propertyHasRelation($property->getName())) {
                 $properties[] = new Property($property->getName(), $mappingCollection->getColumnName($property->getName()));
+
+                continue;
+            }
+
+            $entityRelation = $entityInstance->getPropertyRelation($property->getName());
+
+            if ($entityRelation->isRelationType(new RelationType(RelationType::ONE_TO_ONE))) {
+                /** @var OneToOne $entityRelation */
+                $properties[] = new Property(
+                    $property->getName(),
+                    $entityRelation->getLocalKey(),
+                    $entityInstance->getPropertyRelation($property->getName())
+                );
 
                 continue;
             }

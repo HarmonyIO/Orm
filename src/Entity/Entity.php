@@ -4,36 +4,77 @@ namespace HarmonyIO\Orm\Entity;
 
 use Doctrine\Common\Inflector\Inflector;
 use HarmonyIO\Orm\Entity\Definition\Relation\LoadType;
+use HarmonyIO\Orm\Entity\Definition\Relation\ManyToMany;
+use HarmonyIO\Orm\Entity\Definition\Relation\OneToMany;
+use HarmonyIO\Orm\Entity\Definition\Relation\OneToOne;
 use HarmonyIO\Orm\Entity\Definition\Relation\Relation;
-use HarmonyIO\Orm\Entity\Definition\Relation\RelationType;
 
 abstract class Entity
 {
     /** @var Relation[] */
     private $relations = [];
 
-    protected function hasOne(string $propertyName, string $entityClass, string $foreignKey = 'id'): void
+    protected function oneToOne(string $propertyName, string $entityClass, string $foreignKey = 'id', ?string $localKey = null): void
     {
-        $this->relations[$propertyName] = new Relation(
-            new RelationType(RelationType::HAS_ONE),
+        if ($localKey === null) {
+            $localKey = Inflector::tableize((new \ReflectionClass($entityClass))->getShortName()) . '_id';
+        }
+
+        $this->relations[$propertyName] = new OneToOne(
             new LoadType(LoadType::EAGER),
             $entityClass,
-            $foreignKey
+            $foreignKey,
+            $localKey
         );
     }
 
-    protected function hasMany(string $propertyName, string $entityClass, ?string $foreignKey = null, string $localKey = 'id'): void
+    protected function oneToMany(string $propertyName, string $entityClass, ?string $foreignKey = null, string $localKey = 'id'): void
     {
         if ($foreignKey === null) {
             $foreignKey = Inflector::tableize((new \ReflectionClass(static::class))->getShortName()) . '_id';
         }
 
-        $this->relations[$propertyName] = new Relation(
-            new RelationType(RelationType::HAS_MANY),
+        $this->relations[$propertyName] = new OneToMany(
             new LoadType(LoadType::EAGER),
             $entityClass,
             $foreignKey,
             $localKey
+        );
+    }
+
+    protected function manyToMany(
+        string $propertyName,
+        string $entityClass,
+        ?string $linkTableName = null,
+        string $foreignKey = 'id',
+        ?string $foreignLink = null,
+        string $localKey = 'id',
+        ?string $localLink = null
+    ): void {
+        if ($linkTableName === null) {
+            $linkTableName = sprintf(
+                '%s_%s',
+                Inflector::tableize(Inflector::pluralize((new \ReflectionClass(static::class))->getShortName())),
+                Inflector::tableize(Inflector::pluralize((new \ReflectionClass($entityClass))->getShortName()))
+            );
+        }
+
+        if ($foreignLink === null) {
+            $foreignLink = Inflector::tableize((new \ReflectionClass($entityClass))->getShortName()) . '_id';
+        }
+
+        if ($localLink === null) {
+            $localLink = Inflector::tableize((new \ReflectionClass(static::class))->getShortName()) . '_id';
+        }
+
+        $this->relations[$propertyName] = new ManyToMany(
+            new LoadType(LoadType::EAGER),
+            $entityClass,
+            $linkTableName,
+            $foreignKey,
+            $foreignLink,
+            $localKey,
+            $localLink
         );
     }
 

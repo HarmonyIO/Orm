@@ -24,4 +24,4 @@ $em = new EntityManager($connection, $postgresPool, new ArrayCache(), new Hydrat
 /** @var User $userEntity */
 $userEntity = wait($em->find(User::class, 1));
 
-var_dump($userEntity->getNotes());
+var_dump($userEntity);

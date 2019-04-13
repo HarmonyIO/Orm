@@ -4,6 +4,8 @@ namespace HarmonyIO\Orm\Query;
 
 use HarmonyIO\Dbal\Connection;
 use HarmonyIO\Dbal\QueryBuilder\Statement\Select as SelectQuery;
+use HarmonyIO\Orm\Entity\Definition\Relation\ManyToMany;
+use HarmonyIO\Orm\Entity\Definition\Relation\RelationType;
 use HarmonyIO\Orm\Mapping\Entity;
 use HarmonyIO\Orm\Mapping\Field;
 use HarmonyIO\Orm\Mapping\JoinedField;
@@ -52,6 +54,37 @@ class Select
     {
         foreach ($entityMap->getFields() as $field) {
             if (!($field instanceof JoinedField)) {
+                continue;
+            }
+
+            $relation = $field->getProperty()->getRelation();
+
+            if ($relation->isRelationType(new RelationType(RelationType::MANY_TO_MANY))) {
+                /** @var ManyToMany $relation */
+                $query->leftJoin(
+                    $field->getLinkTable()->getName() . ' AS ' . $field->getLinkTable()->getAlias(),
+                    sprintf(
+                        '%s.%s = %s.%s',
+                        $field->getLinkTable()->getAlias(),
+                        $relation->getLocalLink(),
+                        $field->getTable()->getAlias(),
+                        $relation->getLocalKey()
+                    )
+                );
+
+                $query->leftJoin(
+                    $field->getReferencedTable()->getName() . ' AS ' . $field->getReferencedTable()->getAlias(),
+                    sprintf(
+                        '%s.%s = %s.%s',
+                        $field->getReferencedTable()->getAlias(),
+                        $relation->getForeignKey(),
+                        $field->getLinkTable()->getAlias(),
+                        $relation->getForeignLink()
+                    )
+                );
+
+                $query = $this->addJoins($query, $field->getEntity());
+
                 continue;
             }
 

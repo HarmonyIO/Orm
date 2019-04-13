@@ -2,7 +2,7 @@
 
 namespace HarmonyIO\Orm\Entity\Definition\Relation;
 
-class Relation
+abstract class Relation
 {
     /** @var RelationType */
     private $relationType;
@@ -13,24 +13,16 @@ class Relation
     /** @var string */
     private $entityClassName;
 
-    /** @var string */
-    private $foreignKey;
-
-    /** @var string|null */
-    private $localKey;
-
-    public function __construct(
-        RelationType $relationType,
-        LoadType $loadType,
-        string $entityClassName,
-        string $foreignKey,
-        ?string $localKey = null
-    ) {
+    public function __construct(RelationType $relationType, LoadType $loadType, string $entityClassName)
+    {
         $this->relationType    = $relationType;
         $this->loadType        = $loadType;
         $this->entityClassName = $entityClassName;
-        $this->foreignKey      = $foreignKey;
-        $this->localKey        = $localKey;
+    }
+
+    public function isRelationType(RelationType $relationType): bool
+    {
+        return $this->relationType->getValue() === $relationType->getValue();
     }
 
     public function getRelationType(): RelationType
@@ -46,15 +38,5 @@ class Relation
     public function getEntityClassName(): string
     {
         return $this->entityClassName;
-    }
-
-    public function getForeignKey(): string
-    {
-        return $this->foreignKey;
-    }
-
-    public function getLocalKey(): ?string
-    {
-        return $this->localKey;
     }
 }

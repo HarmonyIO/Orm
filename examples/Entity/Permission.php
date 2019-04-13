@@ -4,7 +4,7 @@ namespace HarmonyIO\Orm\Examples\Entity;
 
 use HarmonyIO\Orm\Entity\Entity;
 
-class Company extends Entity
+class Permission extends Entity
 {
     /** @var int */
     private $id;
@@ -12,13 +12,8 @@ class Company extends Entity
     /** @var string */
     private $name;
 
-    /** @var Country */
-    private $country;
-
-    protected function relate(): void
-    {
-        $this->oneToOne('country', Country::class);
-    }
+    /** @var string|null */
+    private $description;
 
     public function getId(): int
     {
@@ -30,8 +25,8 @@ class Company extends Entity
         return $this->name;
     }
 
-    public function getCountry(): Country
+    public function getDescription(): ?string
     {
-        return $this->country;
+        return $this->description;
     }
 }

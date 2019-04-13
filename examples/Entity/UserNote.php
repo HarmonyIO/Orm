@@ -18,7 +18,7 @@ class UserNote extends Entity
 
     public function relate(): void
     {
-        $this->hasMany('comments', UserNoteComment::class);
+        $this->oneToMany('comments', UserNoteComment::class);
     }
 
     public function getId(): int
