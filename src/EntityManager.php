@@ -3,6 +3,7 @@
 namespace HarmonyIO\Orm;
 
 use Amp\Promise;
+use Amp\Sql\CommandResult;
 use Amp\Sql\Link;
 use Amp\Sql\ResultSet;
 use Amp\Sql\Statement;
@@ -11,6 +12,7 @@ use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
 use HarmonyIO\Orm\Entity\Entity;
 use HarmonyIO\Orm\Hydrator\Hydrator;
 use HarmonyIO\Orm\Mapping\Entity as EntityMapper;
+use HarmonyIO\Orm\Query\Delete;
 use HarmonyIO\Orm\Query\SelectAll;
 use HarmonyIO\Orm\Query\SelectById;
 use HarmonyIO\Orm\Query\SelectByRelation;
@@ -51,7 +53,7 @@ class EntityManager
 
             /** @var Statement $stmt */
             $stmt = yield $this->link->prepare($query->getQuery());
-
+            //var_dump($query->getParameters(), 1);die;
             /** @var ResultSet $result */
             $result = yield $stmt->execute($query->getParameters());
 
@@ -126,6 +128,23 @@ class EntityManager
             } while (yield $result->advance());
 
             return $this->hydrator->createCollectionFromNestedSet($this, $entity, $entityMapper, $recordSet);
+        });
+    }
+
+    public function delete(Entity $entity): Promise
+    {
+        return call(function () use ($entity) {
+            $entityDefinition = $this->definitionGenerator->generate(get_class($entity));
+            $entityMapper     = new EntityMapper($this->definitionGenerator, $entityDefinition);
+            $query            = (new Delete($this->dbal))->build($entityMapper, yield $entity->getId());
+
+            /** @var Statement $stmt */
+            $stmt = yield $this->link->prepare($query->getQuery());
+
+            /** @var CommandResult $result */
+            $result = yield $stmt->execute($query->getParameters());
+
+            return $result->getAffectedRowCount();
         });
     }
 }
