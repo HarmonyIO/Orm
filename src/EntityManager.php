@@ -11,7 +11,9 @@ use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
 use HarmonyIO\Orm\Entity\Entity;
 use HarmonyIO\Orm\Hydrator\Hydrator;
 use HarmonyIO\Orm\Mapping\Entity as EntityMapper;
-use HarmonyIO\Orm\Query\Select;
+use HarmonyIO\Orm\Query\SelectAll;
+use HarmonyIO\Orm\Query\SelectById;
+use HarmonyIO\Orm\Query\SelectByRelation;
 use function Amp\call;
 
 class EntityManager
@@ -45,7 +47,7 @@ class EntityManager
         return call(function () use ($entity, $id) {
             $entityDefinition = $this->definitionGenerator->generate($entity);
             $entityMapper     = new EntityMapper($this->definitionGenerator, $entityDefinition);
-            $query            = (new Select($this->dbal))->build($entityMapper, $id);
+            $query            = (new SelectById($this->dbal))->build($entityMapper, $id);
 
             /** @var Statement $stmt */
             $stmt = yield $this->link->prepare($query->getQuery());
@@ -63,7 +65,67 @@ class EntityManager
                 $recordSet[] = $result->getCurrent();
             } while (yield $result->advance());
 
-            return $this->hydrator->createEntity($entity, $entityMapper, $recordSet);
+            return $this->hydrator->createEntity($this, $entity, $entityMapper, $recordSet);
+        });
+    }
+
+    /**
+     * @param mixed $id
+     * @return Promise<Entity|null>
+     */
+    public function findByRelation(string $entity, string $relatedEntity, $id): Promise
+    {
+        return call(function () use ($entity, $relatedEntity, $id) {
+            $sourceDefinition = $this->definitionGenerator->generate($entity);
+            $targetDefinition = $this->definitionGenerator->generate($relatedEntity);
+            $sourceMapper     = new EntityMapper($this->definitionGenerator, $sourceDefinition);
+            $targetMapper     = new EntityMapper($this->definitionGenerator, $targetDefinition);
+            $query            = (new SelectByRelation($this->dbal))->build($targetMapper, $sourceMapper->getFields()['notes'], $id);
+
+            /** @var Statement $stmt */
+            $stmt = yield $this->link->prepare($query->getQuery());
+
+            /** @var ResultSet $result */
+            $result = yield $stmt->execute($query->getParameters());
+
+            if (!yield $result->advance()) {
+                return null;
+            }
+
+            $recordSet = [];
+
+            do {
+                $recordSet[] = $result->getCurrent();
+            } while (yield $result->advance());
+
+            return $this->hydrator->createCollectionFromNestedSet($this, $relatedEntity, $targetMapper, $recordSet);
+        });
+    }
+
+    public function findAll(string $entity): Promise
+    {
+        return call(function () use ($entity) {
+            $entityDefinition = $this->definitionGenerator->generate($entity);
+            $entityMapper     = new EntityMapper($this->definitionGenerator, $entityDefinition);
+            $query            = (new SelectAll($this->dbal))->build($entityMapper);
+
+            /** @var Statement $stmt */
+            $stmt = yield $this->link->prepare($query->getQuery());
+
+            /** @var ResultSet $result */
+            $result = yield $stmt->execute($query->getParameters());
+
+            if (!yield $result->advance()) {
+                return null;
+            }
+
+            $recordSet = [];
+
+            do {
+                $recordSet[] = $result->getCurrent();
+            } while (yield $result->advance());
+
+            return $this->hydrator->createCollectionFromNestedSet($this, $entity, $entityMapper, $recordSet);
         });
     }
 }

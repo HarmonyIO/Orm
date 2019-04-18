@@ -49,14 +49,22 @@ class Entity
                 continue;
             }
 
-            $joinedEntity = new Entity(
-                $this->definitionGenerator,
-                $this->definitionGenerator->generate($property->getRelation()->getEntityClassName())
-            );
+            $joinedEntity = null;
 
             $joinedField = $property->getColumn();
 
             $relation = $property->getRelation();
+
+            if (!$relation->isRelationType(new RelationType(RelationType::ONE_TO_MANY))) {
+                $joinedEntity = new Entity(
+                    $this->definitionGenerator,
+                    $this->definitionGenerator->generate($property->getRelation()->getEntityClassName())
+                );
+            } else {
+                $joinedEntity = new LazyEntity(
+                    $this->definitionGenerator->generate($property->getRelation()->getEntityClassName())
+                );
+            }
 
             if ($relation->isRelationType(new RelationType(RelationType::ONE_TO_ONE))) {
                 /** @var OneToOne $relation */
@@ -80,7 +88,8 @@ class Entity
                     $relation->getLocalKey(),
                     $joinedEntity->getTable(),
                     $relation->getForeignKey(),
-                    $joinedEntity
+                    null
+                    //$joinedEntity
                 );
 
                 continue;

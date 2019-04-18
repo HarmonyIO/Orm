@@ -2,30 +2,40 @@
 
 namespace HarmonyIO\Orm\Examples\Entity;
 
+use Amp\Promise;
 use HarmonyIO\Orm\Entity\Entity;
 
 class Country extends Entity
 {
-    /** @var int */
+    /** @var Promise<int> */
     private $id;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $alpha2Code;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $alpha3Code;
 
-    public function getId(): int
+    /**
+     * @return Promise<int>
+     */
+    public function getId(): Promise
     {
         return $this->id;
     }
 
-    public function getAlpha2Code(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getAlpha2Code(): Promise
     {
         return $this->alpha2Code;
     }
 
-    public function getAlpha3Code(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getAlpha3Code(): Promise
     {
         return $this->alpha3Code;
     }

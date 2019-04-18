@@ -2,31 +2,32 @@
 
 namespace HarmonyIO\Orm\Examples\Entity;
 
+use Amp\Promise;
 use HarmonyIO\Orm\Collection;
 use HarmonyIO\Orm\Entity\Definition\Property\Mapping;
 use HarmonyIO\Orm\Entity\Entity;
 
 class User extends Entity
 {
-    /** @var int */
+    /** @var Promise<int> */
     private $id;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $name;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $phoneNumber;
 
-    /** @var Company */
+    /** @var Promise<Company> */
     private $company;
 
-    /** @var Collection */
+    /** @var Promise<Collection> */
     private $notes;
 
-    /** @var Collection */
+    /** @var Promise<Collection> */
     private $permissions;
 
-    /** @var bool */
+    /** @var Promise<bool> */
     private $isAdmin;
 
     protected function table(): string
@@ -51,37 +52,58 @@ class User extends Entity
         $this->manyToMany('permissions', Permission::class);
     }
 
-    public function getId(): int
+    /**
+     * @return Promise<int>
+     */
+    public function getId(): Promise
     {
         return $this->id;
     }
 
-    public function getName(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getName(): Promise
     {
         return $this->name;
     }
 
-    public function getPhoneNumber(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getPhoneNumber(): Promise
     {
         return $this->phoneNumber;
     }
 
-    public function getCompany(): Company
+    /**
+     * @return Promise<Company>
+     */
+    public function getCompany(): Promise
     {
         return $this->company;
     }
 
-    public function getNotes(): Collection
+    /**
+     * @return Promise<Collection>
+     */
+    public function getNotes(): Promise
     {
         return $this->notes;
     }
 
-    public function getPermissions(): Collection
+    /**
+     * @return Promise<Collection>
+     */
+    public function getPermissions(): Promise
     {
         return $this->permissions;
     }
 
-    public function isAdmin(): bool
+    /**
+     * @return Promise<bool>
+     */
+    public function isAdmin(): Promise
     {
         return $this->isAdmin;
     }

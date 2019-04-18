@@ -2,37 +2,56 @@
 
 namespace HarmonyIO\Orm\Examples\Entity;
 
+use Amp\Promise;
 use HarmonyIO\Orm\Collection;
 use HarmonyIO\Orm\Entity\Entity;
 
 class UserNote extends Entity
 {
-    /** @var int */
+    /** @var Promise<int> */
     private $id;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $content;
 
-    /** @var Collection */
-    private $comments;
+    /** @var Promise<Collection> */
+    //private $comments;
+
+    /** @var Promise<User> */
+    private $user;
 
     public function relate(): void
     {
-        $this->oneToMany('comments', UserNoteComment::class);
+        //$this->oneToMany('comments', UserNoteComment::class);
+        $this->manyToOne('user', User::class);
     }
 
-    public function getId(): int
+    /**
+     * @return Promise<int>
+     */
+    public function getId(): Promise
     {
         return $this->id;
     }
 
-    public function getContent(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getContent(): Promise
     {
         return $this->content;
     }
 
-    public function getComments(): Collection
+    /**
+     * @return Promise<Collection>
+     */
+    public function getComments(): Promise
     {
         return $this->comments;
+    }
+
+    public function getUser(): Promise
+    {
+        return $this->user;
     }
 }

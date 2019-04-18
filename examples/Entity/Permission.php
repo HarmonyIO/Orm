@@ -2,30 +2,40 @@
 
 namespace HarmonyIO\Orm\Examples\Entity;
 
+use Amp\Promise;
 use HarmonyIO\Orm\Entity\Entity;
 
 class Permission extends Entity
 {
-    /** @var int */
+    /** @var Promise<int> */
     private $id;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $name;
 
-    /** @var string|null */
+    /** @var Promise<string|null> */
     private $description;
 
-    public function getId(): int
+    /**
+     * @return Promise<int>
+     */
+    public function getId(): Promise
     {
         return $this->id;
     }
 
-    public function getName(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getName(): Promise
     {
         return $this->name;
     }
 
-    public function getDescription(): ?string
+    /**
+     * @return Promise<string|null>
+     */
+    public function getDescription(): Promise
     {
         return $this->description;
     }

@@ -26,6 +26,7 @@ class Collection implements \Iterator, \Countable
     public function contains(Entity $entity): bool
     {
         foreach ($this->entities as $targetEntity) {
+            //phpcs:ignore SlevomatCodingStandard.ControlStructures.DisallowEqualOperators.DisallowedEqualOperator
             if ($targetEntity == $entity) {
                 return true;
             }

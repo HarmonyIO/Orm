@@ -2,20 +2,21 @@
 
 namespace HarmonyIO\Orm\Examples\Entity;
 
+use Amp\Promise;
 use HarmonyIO\Orm\Entity\Entity;
 
 class CompanyLocation extends Entity
 {
-    /** @var int */
+    /** @var Promise<int> */
     private $id;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $address;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $city;
 
-    /** @var Country */
+    /** @var Promise<Country> */
     private $country;
 
     protected function relate(): void
@@ -23,22 +24,34 @@ class CompanyLocation extends Entity
         $this->manyToOne('country', Country::class);
     }
 
-    public function getId(): int
+    /**
+     * @return Promise<int>
+     */
+    public function getId(): Promise
     {
         return $this->id;
     }
 
-    public function getAddress(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getAddress(): Promise
     {
         return $this->address;
     }
 
-    public function getCity(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getCity(): Promise
     {
         return $this->city;
     }
 
-    public function getCountry(): Country
+    /**
+     * @return Promise<Country>
+     */
+    public function getCountry(): Promise
     {
         return $this->country;
     }

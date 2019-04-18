@@ -2,17 +2,18 @@
 
 namespace HarmonyIO\Orm\Examples\Entity;
 
+use Amp\Promise;
 use HarmonyIO\Orm\Entity\Entity;
 
 class Company extends Entity
 {
-    /** @var int */
+    /** @var Promise<int> */
     private $id;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $name;
 
-    /** @var CompanyLocation */
+    /** @var Promise<CompanyLocation> */
     private $location;
 
     protected function relate(): void
@@ -20,17 +21,26 @@ class Company extends Entity
         $this->oneToOne('location', CompanyLocation::class, 'id', 'location_id');
     }
 
-    public function getId(): int
+    /**
+     * @return Promise<int>
+     */
+    public function getId(): Promise
     {
         return $this->id;
     }
 
-    public function getName(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getName(): Promise
     {
         return $this->name;
     }
 
-    public function getLocation(): CompanyLocation
+    /**
+     * @return Promise<CompanyLocation>
+     */
+    public function getLocation(): Promise
     {
         return $this->location;
     }

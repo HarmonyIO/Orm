@@ -21,7 +21,7 @@ class JoinedField
     /** @var string */
     private $referencedField;
 
-    /** @var Entity */
+    /** @var Entity|null */
     private $entity;
 
     /** @var Table|null */
@@ -33,7 +33,7 @@ class JoinedField
         string $field,
         Table $referencedTable,
         string $referencedField,
-        Entity $entity,
+        ?Entity $entity,
         ?Table $linkTable = null
     ) {
         $this->property        = $property;
@@ -70,7 +70,7 @@ class JoinedField
         return $this->referencedField;
     }
 
-    public function getEntity(): Entity
+    public function getEntity(): ?Entity
     {
         return $this->entity;
     }

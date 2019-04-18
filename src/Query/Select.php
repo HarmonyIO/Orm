@@ -7,57 +7,86 @@ use HarmonyIO\Dbal\QueryBuilder\Statement\Select as SelectQuery;
 use HarmonyIO\Orm\Entity\Definition\Relation\ManyToMany;
 use HarmonyIO\Orm\Entity\Definition\Relation\RelationType;
 use HarmonyIO\Orm\Mapping\Entity;
-use HarmonyIO\Orm\Mapping\Field;
-use HarmonyIO\Orm\Mapping\JoinedField;
 
-class Select
+abstract class Select
 {
     /** @var Connection */
-    private $dbal;
+    protected $dbal;
 
     public function __construct(Connection $dbal)
     {
         $this->dbal = $dbal;
     }
 
-    public function build(Entity $entityMap, int $id): SelectQuery
-    {
-        $query = $this->dbal->select(...$this->getFieldsDefinition($entityMap));
-        $query = $query->from($entityMap->getTable()->getName() . ' AS ' . $entityMap->getTable()->getAlias());
-        $query = $this->addJoins($query, $entityMap);
-        $query = $query->where($entityMap->getTable()->getAlias() . '.id = ?', $id);
-
-        return $query;
-    }
-
     /**
      * @return string[]
      */
-    private function getFieldsDefinition(Entity $entityMap): array
+    protected function getFieldsDefinition(Entity $entityMap): array
     {
         $fieldsMapping = $entityMap->getFields();
 
         $fields = [];
 
         foreach ($fieldsMapping as $field) {
-            if ($field instanceof Field) {
+            if (!$field->getProperty()->hasRelation()) {
                 $fields[] = sprintf('%s.%s AS %s', $field->getTable()->getAlias(), $field->getField(), $field->getAlias());
-            } else {
+
+                continue;
+            }
+
+            $relation = $field->getProperty()->getRelation();
+
+            if ($relation->isRelationType(new RelationType(RelationType::ONE_TO_MANY))) {
+                continue;
+            }
+
+            if ($relation->isRelationType(new RelationType(RelationType::MANY_TO_ONE))) {
                 $fields = array_merge($fields, $this->getFieldsDefinition($field->getEntity()));
+
+                continue;
+            }
+
+            // one side needs lazy loading
+            if ($relation->isRelationType(new RelationType(RelationType::ONE_TO_ONE))) {
+                $fields = array_merge($fields, $this->getFieldsDefinition($field->getEntity()));
+
+                continue;
+            }
+
+            // needs lazy loading
+            if ($relation->isRelationType(new RelationType(RelationType::MANY_TO_MANY))) {
+                $fields = array_merge($fields, $this->getFieldsDefinition($field->getEntity()));
+
+                continue;
             }
         }
 
         return $fields;
     }
 
-    private function addJoins(SelectQuery $query, Entity $entityMap): SelectQuery
+    protected function addJoins(SelectQuery $query, Entity $entityMap): SelectQuery
     {
         foreach ($entityMap->getFields() as $field) {
-            if (!($field instanceof JoinedField)) {
+            if (!$field->getProperty()->hasRelation()) {
                 continue;
             }
 
             $relation = $field->getProperty()->getRelation();
+
+            if ($relation->isRelationType(new RelationType(RelationType::ONE_TO_MANY))) {
+                $query->leftJoin(
+                    $field->getReferencedTable()->getName() . ' AS ' .$field->getReferencedTable()->getAlias(),
+                    sprintf(
+                        '%s.%s = %s.%s',
+                        $field->getReferencedTable()->getAlias(),
+                        $relation->getForeignKey(),
+                        $field->getTable()->getAlias(),
+                        $relation->getLocalKey()
+                    )
+                );
+
+                continue;
+            }
 
             if ($relation->isRelationType(new RelationType(RelationType::MANY_TO_MANY))) {
                 /** @var ManyToMany $relation */

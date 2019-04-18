@@ -2,22 +2,29 @@
 
 namespace HarmonyIO\Orm\Examples\Entity;
 
+use Amp\Promise;
 use HarmonyIO\Orm\Entity\Entity;
 
 class UserNoteComment extends Entity
 {
-    /** @var int */
+    /** @var Promise<int> */
     private $id;
 
-    /** @var string */
+    /** @var Promise<string> */
     private $content;
 
-    public function getId(): int
+    /**
+     * @return Promise<int>
+     */
+    public function getId(): Promise
     {
         return $this->id;
     }
 
-    public function getContent(): string
+    /**
+     * @return Promise<string>
+     */
+    public function getContent(): Promise
     {
         return $this->content;
     }
