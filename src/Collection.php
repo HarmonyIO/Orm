@@ -9,6 +9,7 @@ class Collection implements \Iterator, \Countable
     /** @var Entity[] */
     private $entities = [];
 
+    // @todo: we might want to key by id here so other operations are O(1) in userland instead of O(n)
     public function __construct(Entity ...$entities)
     {
         $this->entities = $entities;
@@ -16,7 +17,24 @@ class Collection implements \Iterator, \Countable
 
     public function add(Entity $entity): void
     {
+        if ($this->contains($entity)) {
+            return;
+        }
+
         $this->entities[] = $entity;
+    }
+
+    public function remove(Entity $entity): void
+    {
+        foreach ($this->entities as $index => $targetEntity) {
+            if ($targetEntity->getId() !== $entity->getId()) {
+                continue;
+            }
+
+            unset($this->entities[$index]);
+
+            return;
+        }
     }
 
     /**

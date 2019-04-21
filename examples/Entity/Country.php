@@ -3,6 +3,7 @@
 namespace HarmonyIO\Orm\Examples\Entity;
 
 use Amp\Promise;
+use Amp\Success;
 use HarmonyIO\Orm\Entity\Entity;
 
 class Country extends Entity
@@ -33,10 +34,30 @@ class Country extends Entity
     }
 
     /**
+     * @return Promise<Country>
+     */
+    public function setAlpha2Code(string $alpha2Code): Promise
+    {
+        $this->alpha2Code = new Success($alpha2Code);
+
+        return new Success($this);
+    }
+
+    /**
      * @return Promise<string>
      */
     public function getAlpha3Code(): Promise
     {
         return $this->alpha3Code;
+    }
+
+    /**
+     * @return Promise<Country>
+     */
+    public function setAlpha3Code(string $alpha3Code): Promise
+    {
+        $this->alpha3Code = new Success($alpha3Code);
+
+        return new Success($this);
     }
 }

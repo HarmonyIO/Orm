@@ -3,6 +3,7 @@
 namespace HarmonyIO\Orm\Examples\Entity;
 
 use Amp\Promise;
+use Amp\Success;
 use HarmonyIO\Orm\Entity\Entity;
 
 class Company extends Entity
@@ -38,10 +39,30 @@ class Company extends Entity
     }
 
     /**
+     * @return Promise<Company>
+     */
+    public function setName(string $name): Promise
+    {
+        $this->name = new Success($name);
+
+        return new Success($this);
+    }
+
+    /**
      * @return Promise<CompanyLocation>
      */
     public function getLocation(): Promise
     {
         return $this->location;
+    }
+
+    /**
+     * @return Promise<Company>
+     */
+    public function setLocation(CompanyLocation $location): Promise
+    {
+        $this->location = new Success($location);
+
+        return new Success($this);
     }
 }

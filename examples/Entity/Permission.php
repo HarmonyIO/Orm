@@ -3,6 +3,7 @@
 namespace HarmonyIO\Orm\Examples\Entity;
 
 use Amp\Promise;
+use Amp\Success;
 use HarmonyIO\Orm\Entity\Entity;
 
 class Permission extends Entity
@@ -33,10 +34,30 @@ class Permission extends Entity
     }
 
     /**
+     * @return Promise<Permission>
+     */
+    public function setName(string $name): Promise
+    {
+        $this->name = new Success($name);
+
+        return new Success($this);
+    }
+
+    /**
      * @return Promise<string|null>
      */
     public function getDescription(): Promise
     {
         return $this->description;
+    }
+
+    /**
+     * @return Promise<Permission>
+     */
+    public function setDescription(string $description): Promise
+    {
+        $this->description = new Success($description);
+
+        return new Success($this);
     }
 }

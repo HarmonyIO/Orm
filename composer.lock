@@ -835,12 +835,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/HarmonyIO/Dbal.git",
-                "reference": "4d625d1ec4db6c5aa44d4bf5e15e6f04706f57c5"
+                "reference": "cd8907d93d00361ada7e03defe89f35d838e331a"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/HarmonyIO/Dbal/zipball/4d625d1ec4db6c5aa44d4bf5e15e6f04706f57c5",
-                "reference": "4d625d1ec4db6c5aa44d4bf5e15e6f04706f57c5",
+                "url": "https://api.github.com/repos/HarmonyIO/Dbal/zipball/cd8907d93d00361ada7e03defe89f35d838e331a",
+                "reference": "cd8907d93d00361ada7e03defe89f35d838e331a",
                 "shasum": ""
             },
             "require": {
@@ -877,7 +877,7 @@
                 }
             ],
             "description": "Asynchronous DBAL library",
-            "time": "2019-04-18T12:15:04+00:00"
+            "time": "2019-04-21T15:34:30+00:00"
         },
         {
             "name": "myclabs/php-enum",
@@ -1846,16 +1846,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "7.5.8",
+            "version": "7.5.9",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "c29c0525cf4572c11efe1db49a8b8aee9dfac58a"
+                "reference": "134669cf0eeac3f79bc7f0c793efbc158bffc160"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c29c0525cf4572c11efe1db49a8b8aee9dfac58a",
-                "reference": "c29c0525cf4572c11efe1db49a8b8aee9dfac58a",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/134669cf0eeac3f79bc7f0c793efbc158bffc160",
+                "reference": "134669cf0eeac3f79bc7f0c793efbc158bffc160",
                 "shasum": ""
             },
             "require": {
@@ -1926,7 +1926,7 @@
                 "testing",
                 "xunit"
             ],
-            "time": "2019-03-26T13:23:54+00:00"
+            "time": "2019-04-19T15:50:46+00:00"
         },
         {
             "name": "sebastian/code-unit-reverse-lookup",

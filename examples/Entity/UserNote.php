@@ -3,7 +3,7 @@
 namespace HarmonyIO\Orm\Examples\Entity;
 
 use Amp\Promise;
-use HarmonyIO\Orm\Collection;
+use Amp\Success;
 use HarmonyIO\Orm\Entity\Entity;
 
 class UserNote extends Entity
@@ -14,15 +14,11 @@ class UserNote extends Entity
     /** @var Promise<string> */
     private $content;
 
-    /** @var Promise<Collection> */
-    //private $comments;
-
     /** @var Promise<User> */
     private $user;
 
     public function relate(): void
     {
-        //$this->oneToMany('comments', UserNoteComment::class);
         $this->manyToOne('user', User::class);
     }
 
@@ -43,15 +39,27 @@ class UserNote extends Entity
     }
 
     /**
-     * @return Promise<Collection>
+     * @return Promise<UserNote>
      */
-    public function getComments(): Promise
+    public function setContent(string $content): Promise
     {
-        return $this->comments;
+        $this->content = new Success($content);
+
+        return new Success($this);
     }
 
     public function getUser(): Promise
     {
         return $this->user;
+    }
+
+    /**
+     * @return Promise<UserNote>
+     */
+    public function setUser(User $user): Promise
+    {
+        $this->user = new Success($user);
+
+        return new Success($this);
     }
 }

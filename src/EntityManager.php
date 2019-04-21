@@ -7,11 +7,14 @@ use Amp\Sql\CommandResult;
 use Amp\Sql\Link;
 use Amp\Sql\ResultSet;
 use Amp\Sql\Statement;
+use Amp\Success;
 use HarmonyIO\Dbal\Connection;
+use HarmonyIO\Dbal\QueryBuilder\Statement\Delete as DeleteQuery;
 use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
 use HarmonyIO\Orm\Entity\Entity;
 use HarmonyIO\Orm\Hydrator\Hydrator;
 use HarmonyIO\Orm\Mapping\Entity as EntityMapper;
+use HarmonyIO\Orm\Query\Create;
 use HarmonyIO\Orm\Query\Delete;
 use HarmonyIO\Orm\Query\SelectAll;
 use HarmonyIO\Orm\Query\SelectById;
@@ -53,7 +56,7 @@ class EntityManager
 
             /** @var Statement $stmt */
             $stmt = yield $this->link->prepare($query->getQuery());
-            //var_dump($query->getParameters(), 1);die;
+
             /** @var ResultSet $result */
             $result = yield $stmt->execute($query->getParameters());
 
@@ -69,6 +72,14 @@ class EntityManager
 
             return $this->hydrator->createEntity($this, $entity, $entityMapper, $recordSet);
         });
+    }
+
+    /**
+     * @return Promise<Entity|null>
+     */
+    public function refresh(Entity $entity): Promise
+    {
+        return $this->find(get_class($entity), $entity->getId());
     }
 
     /**
@@ -145,6 +156,30 @@ class EntityManager
             $result = yield $stmt->execute($query->getParameters());
 
             return $result->getAffectedRowCount();
+        });
+    }
+
+    public function create(Entity $entity): Promise
+    {
+        return call(function () use ($entity) {
+            $entityDefinition = $this->definitionGenerator->generate(get_class($entity));
+            $entityMapper     = new EntityMapper($this->definitionGenerator, $entityDefinition);
+            /** @var DeleteQuery $query */
+            $query            = yield (new Create($this->dbal))->build($entity, $entityMapper);
+
+            /** @var Statement $stmt */
+            $stmt = yield $this->link->prepare($query->getQuery() . ' RETURNING id');
+
+            /** @var ResultSet $result */
+            $result = yield $stmt->execute($query->getParameters());
+
+            yield $result->advance();
+
+            $closure = \Closure::bind(function () use ($result): void {
+                $this->id = new Success($result->getCurrent()['id']);
+            }, $entity, get_class($entity));
+
+            $closure->call($entity);
         });
     }
 }
