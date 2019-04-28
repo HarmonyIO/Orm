@@ -40,6 +40,8 @@ class Permission extends Entity
     {
         $this->name = new Success($name);
 
+        $this->markPropertyAsChanged('name');
+
         return new Success($this);
     }
 
@@ -57,6 +59,8 @@ class Permission extends Entity
     public function setDescription(string $description): Promise
     {
         $this->description = new Success($description);
+
+        $this->markPropertyAsChanged('description');
 
         return new Success($this);
     }

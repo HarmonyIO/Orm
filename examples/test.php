@@ -25,26 +25,19 @@ $connection = new Connection($postgresPool);
 $em = new EntityManager($connection, $postgresPool, new ArrayCache(), new Hydrator());
 
 Loop::run(static function () use ($em): \Generator {
-    $user = new User();
-    $user->setName('Pieter Hordijk');
-    $user->setPhoneNumber('1112223334');
-    $user->setCompany(yield $em->find(Company::class, 1));
+    /** @var User $user */
+    $user    = yield $em->find(User::class, 1);
+    /** @var Company $company */
+    $company = yield $em->find(Company::class, 1);
 
-    yield $em->create($user);
+    yield $user->setName('Test User');
+    yield $user->setPhoneNumber('9991114445x');
+    yield $user->setCompany($company);
 
-    $note = new UserNote();
-    $note->setContent('!!!This is my test to see whether it actually creates a note now!!!');
-    $note->setUser($user);
-
-    yield $em->create($note);
+    yield $em->update($user);
 
     /** @var User $user */
-    $user = yield $em->refresh($user);
+    $user = yield $em->find(User::class, 1);
 
-    /** @var Collection $notes */
-    $notes = yield $user->getNotes();
-
-    var_dump(count($notes));
-
-    var_dump(yield $em->findAll(UserNote::class));
+    var_dump(yield $user->getPhoneNumber());die;
 });

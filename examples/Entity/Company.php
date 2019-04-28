@@ -45,6 +45,8 @@ class Company extends Entity
     {
         $this->name = new Success($name);
 
+        $this->markPropertyAsChanged('name');
+
         return new Success($this);
     }
 
@@ -62,6 +64,8 @@ class Company extends Entity
     public function setLocation(CompanyLocation $location): Promise
     {
         $this->location = new Success($location);
+
+        $this->markPropertyAsChanged('location');
 
         return new Success($this);
     }

@@ -10,6 +10,7 @@ use Amp\Sql\Statement;
 use Amp\Success;
 use HarmonyIO\Dbal\Connection;
 use HarmonyIO\Dbal\QueryBuilder\Statement\Delete as DeleteQuery;
+use HarmonyIO\Dbal\QueryBuilder\Statement\Update as UpdateQuery;
 use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
 use HarmonyIO\Orm\Entity\Entity;
 use HarmonyIO\Orm\Hydrator\Hydrator;
@@ -19,6 +20,7 @@ use HarmonyIO\Orm\Query\Delete;
 use HarmonyIO\Orm\Query\SelectAll;
 use HarmonyIO\Orm\Query\SelectById;
 use HarmonyIO\Orm\Query\SelectByRelation;
+use HarmonyIO\Orm\Query\Update;
 use function Amp\call;
 
 class EntityManager
@@ -168,6 +170,7 @@ class EntityManager
             $query            = yield (new Create($this->dbal))->build($entity, $entityMapper);
 
             /** @var Statement $stmt */
+            // @todo: make this db engine agnostic. amphp/mysql supports lastInsertId instead of returning
             $stmt = yield $this->link->prepare($query->getQuery() . ' RETURNING id');
 
             /** @var ResultSet $result */
@@ -180,6 +183,24 @@ class EntityManager
             }, $entity, get_class($entity));
 
             $closure->call($entity);
+        });
+    }
+
+    public function update(Entity $entity): Promise
+    {
+        return call(function() use ($entity) {
+            $entityDefinition = $this->definitionGenerator->generate(get_class($entity));
+            $entityMapper     = new EntityMapper($this->definitionGenerator, $entityDefinition);
+            /** @var UpdateQuery $query */
+            $query            = yield (new Update($this->dbal))->build($entity, $entityMapper);
+
+            /** @var Statement $stmt */
+            $stmt = yield $this->link->prepare($query->getQuery());
+
+            /** @var CommandResult $result */
+            $result = yield $stmt->execute($query->getParameters());
+
+            return $result->getAffectedRowCount();
         });
     }
 }

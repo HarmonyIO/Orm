@@ -69,33 +69,6 @@ class Hydrator
                         $this->getIdentifierValueForRelation($relation, $entityMapper, $recordSet[0])
                     )
                 );
-
-                /*
-                $nestedRecordSet = [];
-
-                foreach ($recordSet as $record) {
-                    if ($record[$entityMapper->getFields()['id']->getAlias()] !== $recordSet[0][$entityMapper->getFields()['id']->getAlias()]) {
-                        continue;
-                    }
-
-                    $nestedRecordSet[] = $record;
-                }
-
-                $collection = $this->createCollection(
-                    $field->getEntity()->getEntityClassName(),
-                    $field->getEntity(),
-                    $nestedRecordSet
-                );
-
-                $this->setProperty(
-                    $reflectionClass,
-                    $entity,
-                    $field->getProperty()->getName(),
-                    $collection
-                );
-
-                continue;
-                */
             }
 
             if ($relation->isRelationType(new RelationType(RelationType::MANY_TO_MANY))) {

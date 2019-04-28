@@ -40,6 +40,8 @@ class Country extends Entity
     {
         $this->alpha2Code = new Success($alpha2Code);
 
+        $this->markPropertyAsChanged('alpha2Code');
+
         return new Success($this);
     }
 
@@ -57,6 +59,8 @@ class Country extends Entity
     public function setAlpha3Code(string $alpha3Code): Promise
     {
         $this->alpha3Code = new Success($alpha3Code);
+
+        $this->markPropertyAsChanged('alpha3Code');
 
         return new Success($this);
     }

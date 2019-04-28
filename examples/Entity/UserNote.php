@@ -45,6 +45,8 @@ class UserNote extends Entity
     {
         $this->content = new Success($content);
 
+        $this->markPropertyAsChanged('content');
+
         return new Success($this);
     }
 
@@ -59,6 +61,8 @@ class UserNote extends Entity
     public function setUser(User $user): Promise
     {
         $this->user = new Success($user);
+
+        $this->markPropertyAsChanged('user');
 
         return new Success($this);
     }

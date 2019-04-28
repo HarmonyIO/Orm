@@ -12,25 +12,25 @@ use function Amp\call;
 class User extends Entity
 {
     /** @var Promise<int> */
-    private $id;
+    protected $id;
 
     /** @var Promise<string> */
-    private $name;
+    protected $name;
 
     /** @var Promise<string> */
-    private $phoneNumber;
+    protected $phoneNumber;
 
     /** @var Promise<Company> */
-    private $company;
+    protected $company;
 
     /** @var Promise<Collection> */
-    private $notes;
+    protected $notes;
 
     /** @var Promise<Collection> */
-    private $permissions;
+    protected $permissions;
 
     /** @var Promise<bool> */
-    private $isAdmin;
+    protected $isAdmin;
 
     protected function table(): string
     {
@@ -84,6 +84,8 @@ class User extends Entity
     {
         $this->name = new Success($name);
 
+        $this->markPropertyAsChanged('name');
+
         return new Success($this);
     }
 
@@ -101,6 +103,8 @@ class User extends Entity
     public function setPhoneNumber(string $phoneNumber): Promise
     {
         $this->phoneNumber = new Success($phoneNumber);
+
+        $this->markPropertyAsChanged('phoneNumber');
 
         return new Success($this);
     }
@@ -120,6 +124,8 @@ class User extends Entity
     {
         $this->company = new Success($company);
 
+        $this->markPropertyAsChanged('company');
+
         return new Success($this);
     }
 
@@ -137,6 +143,8 @@ class User extends Entity
     public function setNotes(Collection $notes): Promise
     {
         $this->notes = new Success($notes);
+
+        $this->markPropertyAsChanged('notes');
 
         return new Success($this);
     }
@@ -159,6 +167,8 @@ class User extends Entity
             }
 
             $this->notes = new Success($collection);
+
+            $this->markPropertyAsChanged('notes');
 
             return $this;
         });
@@ -183,6 +193,8 @@ class User extends Entity
 
             $this->notes = new Success($collection);
 
+            $this->markPropertyAsChanged('notes');
+
             return $this;
         });
     }
@@ -201,6 +213,8 @@ class User extends Entity
     public function setPermissions(Collection $permissions): Promise
     {
         $this->permissions = new Success($permissions);
+
+        $this->markPropertyAsChanged('permissions');
 
         return new Success($this);
     }
@@ -223,6 +237,8 @@ class User extends Entity
             }
 
             $this->permissions = new Success($collection);
+
+            $this->markPropertyAsChanged('permissions');
 
             return $this;
         });
@@ -247,6 +263,8 @@ class User extends Entity
 
             $this->permissions = new Success($collection);
 
+            $this->markPropertyAsChanged('permissions');
+
             return $this;
         });
     }
@@ -262,6 +280,8 @@ class User extends Entity
     public function setAdmin(bool $isAdmin): Promise
     {
         $this->isAdmin = new Success($isAdmin);
+
+        $this->markPropertyAsChanged('isAdmin');
 
         return new Success($this);
     }

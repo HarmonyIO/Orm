@@ -15,6 +15,9 @@ abstract class Entity
     /** @var Relation[] */
     private $relations = [];
 
+    /** @var string[] */
+    private $changedProperties = [];
+
     protected function oneToOne(string $propertyName, string $entityClass, string $foreignKey = 'id', ?string $localKey = null): void
     {
         if ($localKey === null) {
@@ -107,5 +110,15 @@ abstract class Entity
         }
 
         return $this->relations[$propertyName];
+    }
+
+    public function markPropertyAsChanged(string $propertyName): void
+    {
+        $this->changedProperties[] = $propertyName;
+    }
+
+    public function isPropertyChanged(string $propertyName): bool
+    {
+        return in_array($propertyName, $this->changedProperties);
     }
 }
