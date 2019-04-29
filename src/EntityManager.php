@@ -7,11 +7,13 @@ use Amp\Sql\CommandResult;
 use Amp\Sql\Link;
 use Amp\Sql\ResultSet;
 use Amp\Sql\Statement;
+use Amp\Sql\Transaction;
 use Amp\Success;
 use HarmonyIO\Dbal\Connection;
 use HarmonyIO\Dbal\QueryBuilder\Statement\Delete as DeleteQuery;
 use HarmonyIO\Dbal\QueryBuilder\Statement\Update as UpdateQuery;
 use HarmonyIO\Orm\Entity\Definition\Generator\Generator;
+use HarmonyIO\Orm\Entity\Definition\Relation\RelationType;
 use HarmonyIO\Orm\Entity\Entity;
 use HarmonyIO\Orm\Hydrator\Hydrator;
 use HarmonyIO\Orm\Mapping\Entity as EntityMapper;
@@ -188,11 +190,14 @@ class EntityManager
 
     public function update(Entity $entity): Promise
     {
-        return call(function() use ($entity) {
+        return call(function () use ($entity) {
             $entityDefinition = $this->definitionGenerator->generate(get_class($entity));
             $entityMapper     = new EntityMapper($this->definitionGenerator, $entityDefinition);
             /** @var UpdateQuery $query */
             $query            = yield (new Update($this->dbal))->build($entity, $entityMapper);
+
+            /** @var Transaction $transaction */
+            $transaction = yield $this->link->beginTransaction();
 
             /** @var Statement $stmt */
             $stmt = yield $this->link->prepare($query->getQuery());
@@ -200,7 +205,26 @@ class EntityManager
             /** @var CommandResult $result */
             $result = yield $stmt->execute($query->getParameters());
 
+            yield $transaction->commit();
+
             return $result->getAffectedRowCount();
+        });
+    }
+
+    private function reMapManyToManyRelations(Entity $entity, EntityMapper $entityMap): Promise
+    {
+        return call(function () use ($entity, $entityMap) {
+            foreach ($entityMap->getFields() as $field) {
+                if (!$field->getProperty()->hasRelation()) {
+                    continue;
+                }
+
+                $relation = $field->getProperty()->getRelation();
+
+                if ($relation->isRelationType(new RelationType(RelationType::MANY_TO_MANY))) {
+
+                }
+            }
         });
     }
 }

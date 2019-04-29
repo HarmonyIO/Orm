@@ -6,6 +6,9 @@ use HarmonyIO\Orm\Entity\Entity;
 
 class Collection implements \Iterator, \Countable
 {
+    /** @var bool */
+    private $isChanged = false;
+
     /** @var Entity[] */
     private $entities = [];
 
@@ -21,6 +24,8 @@ class Collection implements \Iterator, \Countable
             return;
         }
 
+        $this->markAsChanged();
+
         $this->entities[] = $entity;
     }
 
@@ -30,6 +35,8 @@ class Collection implements \Iterator, \Countable
             if ($targetEntity->getId() !== $entity->getId()) {
                 continue;
             }
+
+            $this->markAsChanged();
 
             unset($this->entities[$index]);
 
@@ -81,5 +88,15 @@ class Collection implements \Iterator, \Countable
     public function count(): int
     {
         return count($this->entities);
+    }
+
+    public function markAsChanged(): void
+    {
+        $this->isChanged = true;
+    }
+
+    public function isChanged(): bool
+    {
+        return $this->isChanged;
     }
 }

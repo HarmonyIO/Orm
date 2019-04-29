@@ -2,7 +2,6 @@
 
 namespace HarmonyIO\Orm\Query;
 
-use function Amp\call;
 use Amp\Promise;
 use Amp\Success;
 use HarmonyIO\Dbal\Connection;
@@ -10,6 +9,7 @@ use HarmonyIO\Dbal\QueryBuilder\Statement\Delete as DeleteQuery;
 use HarmonyIO\Orm\Entity\Definition\Relation\RelationType;
 use HarmonyIO\Orm\Entity\Entity;
 use HarmonyIO\Orm\Mapping\Entity as EntityMapper;
+use function Amp\call;
 
 class Update
 {

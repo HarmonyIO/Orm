@@ -214,7 +214,7 @@ class User extends Entity
     {
         $this->permissions = new Success($permissions);
 
-        $this->markPropertyAsChanged('permissions');
+        $this->permissions->markAsChanged();
 
         return new Success($this);
     }
@@ -238,7 +238,7 @@ class User extends Entity
 
             $this->permissions = new Success($collection);
 
-            $this->markPropertyAsChanged('permissions');
+            $this->permissions->markAsChanged();
 
             return $this;
         });
@@ -261,7 +261,7 @@ class User extends Entity
                 $collection->remove($permission);
             }
 
-            $this->permissions = new Success($collection);
+            $this->permissions->markAsChanged();
 
             $this->markPropertyAsChanged('permissions');
 
